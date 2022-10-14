@@ -5,6 +5,10 @@
         You {{ won ? "won" : "Lost" }}
       </h1>
     </div>
+    <div class="aiControls">
+      <button @click="makeAiMove">Move</button>
+      <button @click="aiGame">Play entire game</button>
+    </div>
     <div class="minesweeper">
       <div class="row" v-for="(row, y) in revealed" :key="y">
         <div
@@ -20,6 +24,7 @@
     </div>
     <div class="bottomSelect">
       <button @click="reset()">reset</button>
+      <button @click="playEmpty()">Play empty</button>
       <div class="difficulties">
         <button
           v-for="difficulty in difficulties"
@@ -77,6 +82,71 @@ export default {
     },
   },
   methods: {
+    makeAiMove(oneMove = false) {
+      let madeMove = false;
+      for (let y = 0; y < this.revealed.length; y++) {
+        const row = this.revealed[y];
+        for (let x = 0; x < row.length; x++) {
+          const item = row[x];
+          if (item == "h") continue;
+          if (isNaN(item)) continue;
+
+          let emptyFields = [];
+          let bombFields = [];
+          let hiddenFields = [];
+
+          const bombCount = Number(item);
+
+          for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+              const rx = x + i;
+              const ry = y + j;
+
+              if (
+                rx < 0 ||
+                ry < 0 ||
+                ry >= this.revealed.length ||
+                rx >= this.revealed[0].length ||
+                (x == 0 && y == 0)
+              )
+                continue;
+              const field = this.revealed[ry][rx];
+              if (field == "" || !isNaN(field)) emptyFields.push([rx, ry]);
+              else if (field == "h") hiddenFields.push([rx, ry]);
+              else if (field == "f") bombFields.push([rx, ry]);
+            }
+          }
+
+          if (hiddenFields.length == 0) continue;
+
+          // Flag all bombs
+          if (bombCount - bombFields.length == hiddenFields.length) {
+            for (let bomb of hiddenFields) {
+              this.handleMove(...bomb, { button: 2 });
+              madeMove = true;
+              if (oneMove) return;
+            }
+          }
+          if (bombCount - bombFields.length == 0) {
+            for (let field of hiddenFields) {
+              this.handleMove(...field);
+              madeMove = true;
+              if (oneMove) return;
+            }
+          }
+        }
+      }
+      return madeMove;
+    },
+    aiGame() {
+      while (this.makeAiMove()) {
+        setTimeout(() => {
+          this.aiGame();
+        }, 10);
+        return;
+      }
+      console.log("No moves available");
+    },
     changeDifficulty(difficulty) {
       this.fieldSize = difficulty.size;
       this.bombCount = difficulty.mines;
@@ -227,6 +297,18 @@ export default {
         }
       }
     },
+    playEmpty(onlyOne = true) {
+      for (let y = 0; y < this.field.length; y++) {
+        const row = this.field[y];
+        for (let x = 0; x < row.length; x++) {
+          const item = row[x];
+          if (item == "" && this.revealed[y][x] == "h") {
+            this.handleMove(x, y);
+            if (onlyOne) return;
+          }
+        }
+      }
+    },
   },
   created() {
     this.selectedDifficulty = this.difficulties[0].name;
@@ -284,6 +366,11 @@ export default {
         color: red;
       }
     }
+  }
+
+  .aiControls{
+    display: flex;
+    gap: 20px;
   }
 
   .minesweeper {
