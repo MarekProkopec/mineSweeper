@@ -8,13 +8,14 @@
     <div class="aiControls">
       <button @click="makeAiMove">Move</button>
       <button @click="aiGame">Play entire game</button>
+      <p>Bombs left: {{bombsLeft}}</p>
     </div>
     <div class="minesweeper">
       <div class="row" v-for="(row, y) in revealed" :key="y">
         <div
           class="cell"
           v-for="(cell, x) in row"
-          :key="`${x}${cell}`"
+          :key="`${x * fieldSize}${cell}`"
           @mouseup="handleMove(x, y, $event)"
           :class="`c-${cell}`"
         >
@@ -80,6 +81,14 @@ export default {
       }
       return true;
     },
+    bombsLeft(){
+      let num = this.bombCount;
+
+      for(let row of this.revealed){
+        num -= row.filter(e => {return e == "f"}).length
+      }
+      return num;
+    }
   },
   methods: {
     makeAiMove(oneMove = false) {
@@ -283,6 +292,7 @@ export default {
       // Left click
       if (event.button == 0) {
         const value = this.field[y][x];
+        if (this.revealed[y][x] == "f") return;
         this.$set(this.revealed[y], x, value);
 
         if (value == "") this.unfoldEmpty(x, y);
@@ -353,8 +363,8 @@ export default {
   padding: Min(1vh, 1vw);
 
   .endMessage {
-    $size: 10;
-    $sizeStyle: Min(#{$size}vh, #{$size}vw);
+    $size: 3;
+    $sizeStyle: Min(#{$size}vh, 90vw);
     height: $sizeStyle;
     h1 {
       max-height: 100%;
@@ -368,15 +378,17 @@ export default {
     }
   }
 
-  .aiControls{
+  .aiControls {
+    $size: 2;
+    $sizeStyle: Min(#{$size}vh, 90vw);
     display: flex;
     gap: 20px;
   }
 
   .minesweeper {
+    $size: 85;
     border: solid 2px rgba($color: #000000, $alpha: 0.2);
-    $size: 70;
-    $sizeStyle: Min(#{$size}vh, #{$size}vw);
+    $sizeStyle: Min(#{$size}vh, 90vw);
     height: $sizeStyle;
     width: $sizeStyle;
     font-family: DSEG;
@@ -402,6 +414,7 @@ export default {
         background: white;
         font-size: 100%;
         user-select: none;
+        overflow: hidden;
 
         &.c-h {
           background: rgba($color: #000000, $alpha: 0.05);
@@ -454,8 +467,8 @@ export default {
   }
 
   .bottomSelect {
-    $size: 15;
-    $sizeStyle: Min(#{$size}vh, #{$size}vw);
+    $size: 20;
+    $sizeStyle: Min(#{$size}vh, 90vw);
     height: $sizeStyle;
     display: flex;
     flex-direction: column;
