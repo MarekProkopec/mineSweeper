@@ -1,47 +1,71 @@
 <template>
-  <div id="app">
-    <div class="endMessage">
-      <h1 v-if="showEndMeesage" :class="won ? 'won' : 'lost'">
-        You {{ won ? "won" : "Lost" }}
-      </h1>
-    </div>
-    <div class="aiControls">
-      <button @click="makeAiMove">Move</button>
-      <button @click="aiGame">Play entire game</button>
-      <p>Bombs left: {{bombsLeft}}</p>
-    </div>
-    <div class="minesweeper">
-      <div class="row" v-for="(row, y) in revealed" :key="y">
-        <div
-          class="cell"
-          v-for="(cell, x) in row"
-          :key="`${x * fieldSize}${cell}`"
-          @mouseup="handleMove(x, y, $event)"
-          :class="`c-${cell}`"
-        >
-          {{ cell == "h" ? "" : cell }}
+  <v-app>
+    <div class="app">
+      <div class="gameInfo">
+        <v-card v-if="showEndMeesage" class="endMessage">
+          <v-card-text>
+            <div class="title text-h4">
+              <h1 :class="won ? 'won' : 'lost'">
+                You {{ won ? "won" : "Lost" }}
+              </h1>
+            </div>
+          </v-card-text>
+        </v-card>
+        <v-card>
+          <v-card-title> AI Controls </v-card-title>
+          <v-card-text class="d-flex justify-space-between">
+            <v-btn @click="makeAiMove">Move</v-btn>
+            <v-btn @click="aiGame">Play entire game</v-btn>
+          </v-card-text>
+        </v-card>
+        <v-card>
+          <v-card-title> Game info </v-card-title>
+          <v-card-text>
+            <p>Bombs left: {{ bombsLeft }}</p>
+            <p class="difficulty">
+              Difficulty:
+              <span :class="selectedDifficulty">{{ selectedDifficulty }}</span>
+            </p>
+          </v-card-text>
+        </v-card>
+        <v-card>
+          <v-card-title> Controls </v-card-title>
+          <v-card-text class="d-flex justify-space-between">
+            <v-btn @click="reset()">reset</v-btn>
+            <v-btn @click="playEmpty()">Play empty</v-btn>
+          </v-card-text>
+        </v-card>
+        <v-card>
+          <v-card-title> Select difficulty </v-card-title>
+          <v-card-text class="d-flex justify-space-between align-center">
+            <v-btn
+              text
+              v-for="difficulty in difficulties"
+              :key="difficulty.name"
+              @click="changeDifficulty(difficulty)"
+              :class="difficulty.name"
+            >
+              {{ difficulty.name }}
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </div>
+
+      <div class="minesweeper">
+        <div class="tableRow" v-for="(row, y) in revealed" :key="y">
+          <div
+            class="cell"
+            v-for="(cell, x) in row"
+            :key="`${x * fieldSize}${cell}`"
+            @mouseup="handleMove(x, y, $event)"
+            :class="`c-${cell}`"
+          >
+            {{ cell == "h" ? "" : cell }}
+          </div>
         </div>
       </div>
     </div>
-    <div class="bottomSelect">
-      <button @click="reset()">reset</button>
-      <button @click="playEmpty()">Play empty</button>
-      <div class="difficulties">
-        <button
-          v-for="difficulty in difficulties"
-          :key="difficulty.name"
-          @click="changeDifficulty(difficulty)"
-          :class="difficulty.name"
-        >
-          {{ difficulty.name }}
-        </button>
-      </div>
-      <p class="difficulty">
-        Difficulty:
-        <span :class="selectedDifficulty">{{ selectedDifficulty }}</span>
-      </p>
-    </div>
-  </div>
+  </v-app>
 </template>
 
 <script>
@@ -81,14 +105,16 @@ export default {
       }
       return true;
     },
-    bombsLeft(){
+    bombsLeft() {
       let num = this.bombCount;
 
-      for(let row of this.revealed){
-        num -= row.filter(e => {return e == "f"}).length
+      for (let row of this.revealed) {
+        num -= row.filter((e) => {
+          return e == "f";
+        }).length;
       }
       return num;
-    }
+    },
   },
   methods: {
     makeAiMove(oneMove = false) {
@@ -347,134 +373,47 @@ export default {
 <style lang="scss">
 @import url("./styles/reset.css");
 
+$main1: #171717;
+$main2: #444444;
+$main3: #da0037;
+$main4: #ededed;
+
 @font-face {
   font-family: DSEG;
   src: url("./assets/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2");
 }
 
-#app {
+html {
+  overflow: hidden !important;
+}
+
+.app {
   height: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
-  flex-direction: column;
-  gap: 10vh;
-  padding: Min(1vh, 1vw);
+  // flex-direction: column;
+  gap: 5vw;
+  background: $main1;
+  color: $main4;
+  padding: 1vw;
 
-  .endMessage {
-    $size: 3;
-    $sizeStyle: Min(#{$size}vh, 90vw);
-    height: $sizeStyle;
-    h1 {
-      max-height: 100%;
-      font-size: $sizeStyle;
-      &.won {
-        color: green;
-      }
-      &.lost {
-        color: red;
-      }
-    }
-  }
-
-  .aiControls {
-    $size: 2;
-    $sizeStyle: Min(#{$size}vh, 90vw);
+  .gameInfo {
     display: flex;
+    flex-direction: column;
     gap: 20px;
-  }
 
-  .minesweeper {
-    $size: 85;
-    border: solid 2px rgba($color: #000000, $alpha: 0.2);
-    $sizeStyle: Min(#{$size}vh, 90vw);
-    height: $sizeStyle;
-    width: $sizeStyle;
-    font-family: DSEG;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-
-    .row {
-      display: flex;
-      height: 100%;
-      justify-content: space-evenly;
-      align-items: center;
-
-      .cell {
-        border: solid 1px rgba($color: #000000, $alpha: 0.1);
-        height: 100%;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        background: white;
-        font-size: 100%;
-        user-select: none;
-        overflow: hidden;
-
-        &.c-h {
-          background: rgba($color: #000000, $alpha: 0.05);
-          transition: background linear 0.1s;
-          &:hover {
-            background: rgba($color: #000000, $alpha: 0.1);
-          }
+    .endMessage {
+      h1 {
+        &.won {
+          color: green;
         }
-        &.c-b,
-        &.c-f {
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          color: transparent;
-
-          &.c-b {
-            background-image: url("https://www.giantbomb.com/a/uploads/scale_small/8/87790/3216800-icon_mine.png");
-          }
-          &.c-f {
-            background-image: url("https://img1.cgtrader.com/items/3764877/1dfa3f1782/large/minesweeper-flag-icon-v1-002-3d-model-low-poly-max-obj-3ds-fbx-ma-stl.jpg");
-            background-color: rgba($color: #000000, $alpha: 0.3);
-          }
-        }
-        &.c-1 {
-          color: #0000ff;
-        }
-        &.c-2 {
-          color: #008200;
-        }
-        &.c-3 {
-          color: #fe0000;
-        }
-        &.c-4 {
-          color: #000084;
-        }
-        &.c-5 {
-          color: #840000;
-        }
-        &.c-6 {
-          color: #008284;
-        }
-        &.c-7 {
-          color: #840084;
-        }
-        &.c-8 {
-          color: #757575;
+        &.lost {
+          color: red;
         }
       }
     }
-  }
-
-  .bottomSelect {
-    $size: 20;
-    $sizeStyle: Min(#{$size}vh, 90vw);
-    height: $sizeStyle;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: Min(1vh, 1vw);
 
     .difficulties {
       display: flex;
@@ -489,11 +428,6 @@ export default {
         font-weight: bold;
       }
     }
-    button {
-      text-transform: uppercase;
-      padding: 8px 16px;
-      cursor: pointer;
-    }
     .Beginner {
       color: green;
     }
@@ -502,6 +436,91 @@ export default {
     }
     .Expert {
       color: red;
+    }
+  }
+
+  .minesweeper {
+    background: $main2;
+
+    border: solid 2px rgba($color: $main3, $alpha: 0.6);
+    font-family: DSEG;
+    height: min(50vw, 90vh);
+    aspect-ratio: 1 / 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    .tableRow {
+      display: flex;
+      height: 100%;
+      justify-content: space-evenly;
+      align-items: center;
+
+      .cell {
+        background: $main1;
+
+        border: solid 1px rgba($color: $main3, $alpha: 0.3);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 100%;
+        user-select: none;
+        overflow: hidden;
+
+        &.c-h {
+          background: $main2;
+          // background: rgba($color: #000000, $alpha: 0.1);
+          transition: background linear 0.1s;
+          &:hover {
+            background: darken($color: $main2, $amount: 5);
+          }
+        }
+        &.c-b,
+        &.c-f {
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          color: transparent;
+
+          &.c-b {
+            background-image: url("./assets/images/bomb.png"); 
+            background-color: $main3;
+          }
+          &.c-f {
+            // background-image: url("https://img1.cgtrader.com/items/3764877/1dfa3f1782/large/minesweeper-flag-icon-v1-002-3d-model-low-poly-max-obj-3ds-fbx-ma-stl.jpg");
+            background-image: url("./assets/images/flag.png"); 
+            background-color: lighten($color: $main1, $amount: 8);
+          }
+        }
+        &.c-1 {
+          color: #0000ff;
+        }
+        &.c-2 {
+          color: #008200;
+        }
+        &.c-3 {
+          color: #fe0000;
+        }
+        &.c-4 {
+          color: #0F4C75;
+        }
+        &.c-5 {
+          color: #840000;
+        }
+        &.c-6 {
+          color: #008284;
+        }
+        &.c-7 {
+          color: #840084;
+        }
+        &.c-8 {
+          color: #757575;
+        }
+      }
     }
   }
 }
