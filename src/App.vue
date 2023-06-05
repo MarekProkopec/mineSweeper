@@ -442,7 +442,11 @@ html {
   .minesweeper {
     background: $main2;
 
-    border: solid 2px rgba($color: $main3, $alpha: 0.6);
+    // border: solid 3px $main3;
+    box-shadow: 0 0 0 4px $main3;
+    padding: 1px;
+    border-radius: 10px;
+
     font-family: DSEG;
     height: min(50vw, 90vh);
     aspect-ratio: 1 / 1;
@@ -450,17 +454,22 @@ html {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
+    background: $main3;
+    $cellGap: 2px;
+    gap: $cellGap;
 
     .tableRow {
       display: flex;
       height: 100%;
       justify-content: space-evenly;
       align-items: center;
+      gap: $cellGap;
 
       .cell {
         background: $main1;
+        border-radius: 3px;
 
-        border: solid 1px rgba($color: $main3, $alpha: 0.3);
+        // border: solid 1px rgba($color: $main3, $alpha: 0.3);
         height: 100%;
         width: 100%;
         display: flex;
@@ -487,12 +496,12 @@ html {
           color: transparent;
 
           &.c-b {
-            background-image: url("./assets/images/bomb.png"); 
+            background-image: url("./assets/images/bomb.png");
             background-color: $main3;
           }
           &.c-f {
             // background-image: url("https://img1.cgtrader.com/items/3764877/1dfa3f1782/large/minesweeper-flag-icon-v1-002-3d-model-low-poly-max-obj-3ds-fbx-ma-stl.jpg");
-            background-image: url("./assets/images/flag.png"); 
+            background-image: url("./assets/images/flag.png");
             background-color: lighten($color: $main1, $amount: 8);
           }
         }
@@ -506,7 +515,7 @@ html {
           color: #fe0000;
         }
         &.c-4 {
-          color: #0F4C75;
+          color: #0f4c75;
         }
         &.c-5 {
           color: #840000;
